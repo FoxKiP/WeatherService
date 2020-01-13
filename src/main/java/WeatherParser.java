@@ -22,10 +22,8 @@ public class WeatherParser {
         try {
             if (!daoService.fillForecast(forecast)) {
                 Strategy strategy = strategyStorage.getStrategy(resource);
-                if(strategy != null) {
-                    if(strategy.fillForecast(forecast)) {
-                        daoService.addForecast(forecast);
-                    }
+                if(strategy != null && strategy.fillForecast(forecast)) {
+                    daoService.addForecast(forecast);
                 }
             }
             jsonForecast = JsonMapper.getJson(forecast);
