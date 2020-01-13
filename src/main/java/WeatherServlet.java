@@ -23,5 +23,6 @@ public class WeatherServlet extends HttpServlet {
 
         PrintWriter writer = response.getWriter();
         writer.println(parser.getForecast(city, resource));
+        writer.close();
     }
 }
