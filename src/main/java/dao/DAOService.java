@@ -39,6 +39,7 @@ public class DAOService implements Service {
                 forecast.setHumidity(resultSet.getString("humidity"));
                 result = true;
             }
+            resultSet.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }

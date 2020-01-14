@@ -11,6 +11,7 @@ class Storage {
         if(connection != null) {
             Statement statement = connection.createStatement();
             statement.execute(sql);
+            statement.close();
             connection.close();
         }
     }
@@ -27,17 +28,17 @@ class Storage {
     }
 
     private Connection openConnection() throws SQLException {
-        DataSource ds = null;
         Connection connection = null;
         try {
             InitialContext context = new InitialContext();
             String resourceName = "jdbc/postgres";
-            ds = (DataSource) context.lookup("java:/comp/env/".concat(resourceName));
+            DataSource ds = (DataSource) context.lookup("java:/comp/env/".concat(resourceName));
+            context.close();
+            if(ds != null) {
+                connection = ds.getConnection();
+            }
         } catch (NamingException e) {
             e.printStackTrace();
-        }
-        if(ds != null) {
-            connection = ds.getConnection();
         }
         return connection;
     }
