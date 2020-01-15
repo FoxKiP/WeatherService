@@ -6,11 +6,11 @@
          version="3.1">
   
   <servlet>
-    <servlet-name>WeatherParserServlet</servlet-name>
+    <servlet-name>WeatherServlet</servlet-name>
     <servlet-class>WeatherServlet</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>WeatherParserServlet</servlet-name>
+    <servlet-name>WeatherServlet</servlet-name>
     <url-pattern>/parse</url-pattern>
   </servlet-mapping>
 </web-app>

@@ -4,6 +4,7 @@ import model.Forecast;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 
 public class DAOService implements Service {
@@ -39,7 +40,7 @@ public class DAOService implements Service {
                 forecast.setHumidity(resultSet.getString("humidity"));
                 result = true;
             }
-            resultSet.close();
+            resultSet.getStatement().close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
