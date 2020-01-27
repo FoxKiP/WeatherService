@@ -21,8 +21,8 @@ public class WeatherServlet extends HttpServlet {
         String resource = request.getParameter("resource");
         WeatherParser parser = new WeatherParser(StrategyStorage.getInstance(), DAOService.getInstance());
 
-        PrintWriter writer = response.getWriter();
-        writer.println(parser.getForecast(city, resource));
-        writer.close();
+        try(PrintWriter writer = response.getWriter()) {
+            writer.println(parser.getForecast(city, resource));
+        }
     }
 }

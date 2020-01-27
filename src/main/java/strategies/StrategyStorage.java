@@ -1,9 +1,14 @@
 package strategies;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import util.Connection;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class StrategyStorage {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StrategyStorage.class);
     private static StrategyStorage instance;
     private final Map<String, Strategy> strategyMap = new HashMap<>();
 
@@ -19,6 +24,8 @@ public class StrategyStorage {
     }
 
     public Strategy getStrategy(String strategyName) {
-        return strategyMap.get(strategyName);
+        Strategy strategy = strategyMap.get(strategyName);
+        if(strategy == null) LOGGER.warn("This strategy is not supported: " + strategyName);
+        return strategy;
     }
 }

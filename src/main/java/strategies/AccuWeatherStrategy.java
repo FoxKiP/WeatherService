@@ -20,12 +20,12 @@ class AccuWeatherStrategy implements Strategy {
     }
 
     @Override
-    public boolean fillForecast(Forecast forecast) throws IOException {
-        String city = forecast.getRequest()[0];
+    public boolean fillForecast(Forecast forecast) {
+        String city = forecast.getRequest();
         String encodeCity = URLEncoder.encode(city, StandardCharsets.UTF_8);
         String cityId = getCityId(encodeCity, forecast);
         boolean result = false;
-        if(!cityId.isEmpty()) {
+        if(cityId != null) {
             String data = Connection.getData(String.format(REQUEST_FORM, cityId));
             JsonNode jsonNode = JsonMapper.getNode(data);
 
@@ -33,7 +33,7 @@ class AccuWeatherStrategy implements Strategy {
             forecast.setTemp(jsonNode.get(0).get("Temperature").get("Value").asText());
             forecast.setLikeTemp(jsonNode.get(0).get("RealFeelTemperature").get("Value").asText());
             forecast.setWindSpeed(jsonNode.get(0).get("Wind").get("Speed").get("Value").asText());
-            forecast.setWindDir(jsonNode.get(0).get("Wind").get("Direction").get("Degrees").asText());
+            forecast.setWindDeg(jsonNode.get(0).get("Wind").get("Direction").get("Degrees").asText());
             forecast.setClouds(jsonNode.get(0).get("CloudCover").asText());
             forecast.setPressure("no data");
             forecast.setHumidity(jsonNode.get(0).get("RelativeHumidity").asText());
@@ -42,15 +42,16 @@ class AccuWeatherStrategy implements Strategy {
         return result;
     }
 
-    private String getCityId(String city, Forecast forecast) throws IOException {
+    private String getCityId(String city, Forecast forecast) {
         String requestForm = "http://dataservice.accuweather.com/locations/v1/cities/search?q=%s&apikey=".concat(TOKEN);
         String data = Connection.getData(String.format(requestForm, city));
-        String cityId = "";
-
-        JsonNode jsonNode = JsonMapper.getNode(data);
-        if(jsonNode.get(0) != null) {
-            forecast.setCity(jsonNode.get(0).get("EnglishName").asText());
-            cityId = jsonNode.get(0).get("Key").asText();
+        String cityId = null;
+        if (data != null) {
+            JsonNode jsonNode = JsonMapper.getNode(data);
+            if (jsonNode.get(0) != null) {
+                forecast.setCity(jsonNode.get(0).get("EnglishName").asText());
+                cityId = jsonNode.get(0).get("Key").asText();
+            }
         }
         return cityId;
     }

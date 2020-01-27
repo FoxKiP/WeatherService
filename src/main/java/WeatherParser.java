@@ -1,7 +1,10 @@
 import dao.Service;
 import model.Forecast;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import strategies.Strategy;
 import strategies.StrategyStorage;
+import util.Connection;
 import util.JsonMapper;
 
 import java.io.IOException;
@@ -16,20 +19,17 @@ public class WeatherParser {
     }
 
     public String getForecast(String city, String resource) {
-        Forecast forecast = new Forecast();
-        forecast.setRequest(city.toLowerCase(), resource);
-        String jsonForecast = "{}";
-        try {
-            if (!daoService.fillForecast(forecast)) {
-                Strategy strategy = strategyStorage.getStrategy(resource);
-                if(strategy != null && strategy.fillForecast(forecast)) {
-                    daoService.addForecast(forecast);
-                }
+        Forecast forecast;
+        forecast = daoService.getForecast(city, resource);
+        if(forecast == null) {
+            forecast = new Forecast();
+            forecast.setRequest(city.toLowerCase());
+            forecast.setResouce(resource);
+            Strategy strategy = strategyStorage.getStrategy(resource);
+            if(strategy != null && strategy.fillForecast(forecast)) {
+                daoService.addForecast(forecast);
             }
-            jsonForecast = JsonMapper.getJson(forecast);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        return jsonForecast;
+        return JsonMapper.getJson(forecast);
     }
 }

@@ -2,25 +2,89 @@ package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Forecast {
-    private String city;
-    private String weather;
-    private String temp;
-    private String likeTemp;
-    private String windSpeed;
-    private String windDir;
-    private String clouds;
-    private String pressure;
-    private String humidity;
-    @JsonIgnore
-    private Request request = new Request();
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
-    public String getClouds() {
-        return clouds;
+
+@Entity
+@Table(name = "weather")
+public class Forecast {
+    @JsonIgnore
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
+    private int id;
+
+    @JsonIgnore
+    @Column(name = "date")
+    private LocalDateTime date;
+
+    @JsonIgnore
+    @Column(name = "request")
+    private String request;
+
+    @JsonIgnore
+    @Column(name = "resource")
+    private String resouce;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "weather")
+    private String weather;
+
+    @Column(name = "temp")
+    private String temp;
+
+    @Column(name = "liketemp")
+    private String likeTemp;
+
+    @Column(name = "windspeed")
+    private String windSpeed;
+
+    @Column(name = "winddeg")
+    private String windDeg;
+
+    @Column(name = "clouds")
+    private String clouds;
+
+    @Column(name = "pressure")
+    private String pressure;
+
+    @Column(name = "humidity")
+    private String humidity;
+
+    public int getId() {
+        return id;
     }
 
-    public void setClouds(String clouds) {
-        this.clouds = clouds;
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
+
+    public String getRequest() {
+        return request;
+    }
+
+    public void setRequest(String request) {
+        this.request = request;
+    }
+
+    public String getResouce() {
+        return resouce;
+    }
+
+    public void setResouce(String resouce) {
+        this.resouce = resouce;
     }
 
     public String getCity() {
@@ -63,12 +127,20 @@ public class Forecast {
         this.windSpeed = windSpeed;
     }
 
-    public String getWindDir() {
-        return windDir;
+    public String getWindDeg() {
+        return windDeg;
     }
 
-    public void setWindDir(String windDir) {
-        this.windDir = windDir;
+    public void setWindDeg(String windDeg) {
+        this.windDeg = windDeg;
+    }
+
+    public String getClouds() {
+        return clouds;
+    }
+
+    public void setClouds(String clouds) {
+        this.clouds = clouds;
     }
 
     public String getPressure() {
@@ -87,48 +159,47 @@ public class Forecast {
         this.humidity = humidity;
     }
 
-    public void setRequest(String city, String resource) {
-        request.setCity(city);
-        request.setResource(resource);
-    }
-
-    public String[] getRequest() {
-        return new String[] {request.getCity(), request.getResource()};
-    }
-
     @Override
     public String toString() {
-        return "Forecast{" +
-                "city='" + city + '\'' +
+        return "weather{" +
+                "id=" + id +
+                ", date=" + date +
+                ", request='" + request + '\'' +
+                ", resouce='" + resouce + '\'' +
+                ", city='" + city + '\'' +
                 ", weather='" + weather + '\'' +
                 ", temp='" + temp + '\'' +
                 ", likeTemp='" + likeTemp + '\'' +
                 ", windSpeed='" + windSpeed + '\'' +
-                ", windDeg='" + windDir + '\'' +
+                ", windDeg='" + windDeg + '\'' +
                 ", clouds='" + clouds + '\'' +
                 ", pressure='" + pressure + '\'' +
                 ", humidity='" + humidity + '\'' +
                 '}';
     }
 
-    private static class Request {
-        private String city;
-        private String resource;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Forecast forecast = (Forecast) o;
+        return Objects.equals(date, forecast.date) &&
+                Objects.equals(request, forecast.request) &&
+                Objects.equals(resouce, forecast.resouce) &&
+                Objects.equals(city, forecast.city) &&
+                Objects.equals(weather, forecast.weather) &&
+                Objects.equals(temp, forecast.temp) &&
+                Objects.equals(likeTemp, forecast.likeTemp) &&
+                Objects.equals(windSpeed, forecast.windSpeed) &&
+                Objects.equals(windDeg, forecast.windDeg) &&
+                Objects.equals(clouds, forecast.clouds) &&
+                Objects.equals(pressure, forecast.pressure) &&
+                Objects.equals(humidity, forecast.humidity);
+    }
 
-        public String getCity() {
-            return city;
-        }
-
-        public void setCity(String city) {
-            this.city = city;
-        }
-
-        public String getResource() {
-            return resource;
-        }
-
-        public void setResource(String resource) {
-            this.resource = resource;
-        }
+    @Override
+    public int hashCode() {
+        return Objects.hash(date, request, resouce, city, weather, temp, likeTemp, windSpeed, windDeg, clouds, pressure, humidity);
     }
 }
+

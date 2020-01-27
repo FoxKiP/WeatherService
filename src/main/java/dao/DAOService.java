@@ -1,6 +1,12 @@
 package dao;
 
 import model.Forecast;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,9 +14,9 @@ import java.sql.Statement;
 import java.time.LocalDateTime;
 
 public class DAOService implements Service {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DAOService.class);
     private static DAOService instance;
     private Storage storage = new Storage();
-    private String tableName = "weather";
 
     private DAOService() {
     }
@@ -21,49 +27,35 @@ public class DAOService implements Service {
     }
 
     @Override
-    public boolean fillForecast(Forecast forecast) {
-        boolean result = false;
-        String[] request = forecast.getRequest();
-        String city = request[0];
-        String resource = request[1];
-        try {
-            ResultSet resultSet = getLastQuery(city, resource);
-            if(resultSet.next()) {
-                forecast.setCity(resultSet.getString("city"));
-                forecast.setWeather(resultSet.getString("weather"));
-                forecast.setTemp(resultSet.getString("temp"));
-                forecast.setLikeTemp(resultSet.getString("likeTemp"));
-                forecast.setWindSpeed(resultSet.getString("windSpeed"));
-                forecast.setWindDir(resultSet.getString("windDeg"));
-                forecast.setClouds(resultSet.getString("clouds"));
-                forecast.setPressure(resultSet.getString("pressure"));
-                forecast.setHumidity(resultSet.getString("humidity"));
-                result = true;
+    public Forecast getForecast(String request, String resource) {
+        Forecast forecast = null;
+        try(Session session = storage.openSession()) {
+            if(session != null) {
+                LocalDateTime date = LocalDateTime.now().minusHours(1);
+                String queryForm = "FROM Forecast WHERE date > '%s' AND request = '%s' AND resource = '%s' ORDER BY id DESC";
+                Query<Forecast> query = session.createQuery(String.format(queryForm, date, request, resource));
+                query.setMaxResults(1);
+                if (!query.list().isEmpty()) {
+                    forecast = query.list().get(0);
+                }
             }
-            resultSet.getStatement().close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
         }
-        return result;
+        return forecast;
     }
 
     @Override
     public void addForecast(Forecast forecast) {
-        String query = "INSERT INTO %s (date, request, resource, city, weather, temp, likeTemp, windSpeed, windDeg, clouds, pressure, humidity)" +
-                "VALUES (TIMESTAMP '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');";
-        String[] request = forecast.getRequest();
-        try {
-            storage.execute(String.format(query, tableName, LocalDateTime.now(), request[0], request[1], forecast.getCity(), forecast.getWeather(),
-                    forecast.getTemp(), forecast.getLikeTemp(), forecast.getWindSpeed(), forecast.getWindDir(), forecast.getClouds(),
-                    forecast.getPressure(), forecast.getHumidity()));
-        } catch (SQLException e) {
-            e.printStackTrace();
+        try(Session session = storage.openSession()) {
+            if(session != null) {
+                Transaction transaction = session.beginTransaction();
+                forecast.setDate(LocalDateTime.now().withNano(0));
+                session.save(forecast);
+                transaction.commit();
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
         }
-    }
-
-    private ResultSet getLastQuery(String city, String resource) throws SQLException {
-        String query = "SELECT * FROM %s WHERE date > timestamp '%s' AND request = '%s' AND resource = '%s' ORDER BY id DESC LIMIT 1;";
-        LocalDateTime time = LocalDateTime.now().minusHours(1);
-        return storage.executeQuery(String.format(query, tableName, time, city, resource));
     }
 }

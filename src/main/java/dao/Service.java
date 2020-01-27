@@ -3,6 +3,6 @@ package dao;
 import model.Forecast;
 
 public interface Service {
-    boolean fillForecast(Forecast forecast);
+    Forecast getForecast(String request, String resource);
     void addForecast(Forecast forecast);
 }

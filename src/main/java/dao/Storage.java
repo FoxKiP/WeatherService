@@ -1,45 +1,32 @@
 package dao;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-import java.sql.*;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class Storage {
-    void execute(String sql) throws SQLException {
-        Connection connection = openConnection();
-        if(connection != null) {
-            Statement statement = connection.createStatement();
-            statement.execute(sql);
-            statement.close();
-            connection.close();
-        }
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(Storage.class);
+    private SessionFactory sessionFactory;
 
-    ResultSet executeQuery(String sql) throws SQLException {
-        ResultSet resultSet = null;
-        Connection connection = openConnection();
-        if(connection != null) {
-            Statement statement = connection.createStatement();
-            resultSet = statement.executeQuery(sql);
-            connection.close();
-        }
-        return resultSet;
-    }
-
-    private Connection openConnection() throws SQLException {
-        Connection connection = null;
+    public Storage() {
         try {
-            InitialContext context = new InitialContext();
-            String resourceName = "jdbc/postgres";
-            DataSource ds = (DataSource) context.lookup("java:/comp/env/".concat(resourceName));
-            context.close();
-            if(ds != null) {
-                connection = ds.getConnection();
-            }
-        } catch (NamingException e) {
-            e.printStackTrace();
+            this.sessionFactory = new Configuration().configure().buildSessionFactory();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
         }
-        return connection;
+    }
+
+    public Session openSession() {
+        Session session = null;
+        try {
+            if (sessionFactory != null) {
+                session = sessionFactory.openSession();
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+        return session;
     }
 }
